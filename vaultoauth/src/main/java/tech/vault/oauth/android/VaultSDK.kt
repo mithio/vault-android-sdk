@@ -1,7 +1,9 @@
 package tech.vault.oauth.android
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import net.openid.appauth.*
 import net.openid.appauth.browser.AnyBrowserMatcher
@@ -9,7 +11,6 @@ import net.openid.appauth.connectivity.DefaultConnectionBuilder
 
 @SuppressLint("StaticFieldLeak")
 class VaultSDK private constructor(
-        private val clientId: String,
         private val appContext: Context
 ) {
 
@@ -18,6 +19,7 @@ class VaultSDK private constructor(
         data class Failure(val error: Throwable) : AuthResult()
     }
 
+    private val clientId = appContext.getString(appContext.resources.getIdentifier("vault_client_id", null, null))
     private val redirectUri: Uri = Uri.parse("tech.vault.oauth.android.$clientId:/oauth2redirect")
     private val authUri = Uri.parse("https://mithvault.io/oauth/authorize")
     private val tokenUri = Uri.parse("https://mithvault.io/oauth/token")
@@ -32,7 +34,7 @@ class VaultSDK private constructor(
             }
 
         fun configure(context: Context) {
-            instance = VaultSDK("TODO: client id", context)
+            instance = VaultSDK(context)
         }
     }
 
@@ -55,9 +57,8 @@ class VaultSDK private constructor(
 
     private val customTabIntent = authorizationService.createCustomTabsIntentBuilder(authRequest.toUri())
 
-    fun requestToken(completionCallback: (result: AuthResult) -> Unit) {
-
+    fun requestToken(activity: Activity) {
+        activity.startActivity(Intent(activity, VaultOAuthActivity::class.java))
     }
-
 
 }
