@@ -15,7 +15,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                'appAuthRedirectScheme': 'tech.vault.oauth.android'
+                'appAuthRedirectScheme': 'vault-ba6cabfb4de8d9f4f388124b1afe82b1'
         ]
     }
     buildTypes {
