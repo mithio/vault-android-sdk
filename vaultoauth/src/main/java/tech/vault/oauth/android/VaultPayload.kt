@@ -20,7 +20,10 @@ internal sealed class VaultPayload {
 
     }
 
-    fun toSignature(key: String): String = hmacSHA512(key.toHexByteArray(), toString()).toHexString()
+    fun toSignature(key: String): String {
+        val data = toString()
+        return hmacSHA512(key.toHexByteArray(), data).toHexString()
+    }
 
     class Dict(private val map: List<Pair<String, VaultPayload>>) : VaultPayload() {
         override fun toString(): String =
