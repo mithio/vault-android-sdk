@@ -2,6 +2,8 @@
     package="tech.vault.oauth.android">
 
     <application>
-        <activity android:name=".VaultOAuthActivity" />
+        <activity
+            android:launchMode="singleTask"
+            android:name=".VaultOAuthActivity" />
     </application>
 </manifest>

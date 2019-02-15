@@ -1,42 +1,44 @@
 package tech.vault.oauth.android
 
-import com.google.gson.annotations.SerializedName
+import android.net.Uri
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.Callback
+import retrofit2.Response
+import java.security.SecureRandom
+import java.util.*
 
-interface VaultService {
+internal class VaultService(
+        private val vaultRetrofitService: VaultRetrofitService,
+        private val clientId: String,
+        private val clientSecret: String
+) {
 
-    class RequestTokenBody(
-            @SerializedName("client_id")
-            val clientId: String,
-            val timestamp: String,
-            val nonce: Int,
-            val state: String,
-            @SerializedName("grant_code")
-            val grantCode: String
-    ) {
-        fun toSig(key: String): String {
-            return VaultPayload.build {
-                dict(
-                        "client_id" to value(clientId),
-                        "timestamp" to value(timestamp),
-                        "nonce" to value(nonce),
-                        "state" to value(state),
-                        "grant_code" to value(grantCode)
-                )
-            }.toSignature(key)
+    fun getAccessToken(resultUri: Uri, callback: (VaultSDK.AuthResult) -> Unit) {
+        val grantCode = resultUri.getQueryParameter("grant_code")
+        val state = resultUri.getQueryParameter("state")
+        if (grantCode != null && state != null) {
+            val timeStamp = (System.currentTimeMillis() / 1000).toString()
+            val nonce = Random().nextInt()
+            val requestBody = VaultRetrofitService.RequestTokenBody(
+                    clientId,
+                    timeStamp,
+                    nonce,
+                    state,
+                    grantCode
+            )
+            vaultRetrofitService
+                    .getToken(
+                            requestBody.toSig(clientSecret),
+                            requestBody)
+                    .enqueue(object : Callback<VaultRetrofitService.TokenBody> {
+                        override fun onFailure(call: Call<VaultRetrofitService.TokenBody>, t: Throwable) {
+                            callback(VaultSDK.AuthResult.Failure(t))
+                        }
+
+                        override fun onResponse(call: Call<VaultRetrofitService.TokenBody>, response: Response<VaultRetrofitService.TokenBody>) {
+                            response.body()?.let { callback(VaultSDK.AuthResult.Success(it.token)) }
+                        }
+                    })
         }
     }
-
-    class TokenBody(
-            val token: String
-    )
-
-    @POST("oauth/token")
-    fun getToken(
-            @Header("X-Vault-Signature") sig: String,
-            @Body body: RequestTokenBody
-    ): Call<TokenBody>
 }
