@@ -5,17 +5,20 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
 typealias VaultCallback<T> = (Result<T>) -> Unit
 
 class VaultSDK private constructor(
         context: Context,
         val clientId: String,
-        val clientSecret: String
+        val clientSecret: String,
+        val miningKey: String
 ) {
 
     class CallbackManager(
@@ -49,8 +52,8 @@ class VaultSDK private constructor(
                 return sharedInstance.pref.contains("authToken")
             }
 
-        fun configure(context: Context, clientId: String, clientSecret: String) {
-            instance = VaultSDK(context, clientId, clientSecret)
+        fun configure(context: Context, clientId: String, clientSecret: String, miningKey: String) {
+            instance = VaultSDK(context, clientId, clientSecret, miningKey)
         }
 
         fun requestToken(activity: AppCompatActivity) {
@@ -60,12 +63,20 @@ class VaultSDK private constructor(
             )
         }
 
-        fun getPersonalInfo(callback: VaultCallback<VaultUserInfo>) {
-            sharedInstance.vaultService.getPersonalInfo(callback)
+        fun getUserInfo(callback: VaultCallback<VaultUserInfo>) {
+            sharedInstance.vaultService.getUserInfo(callback)
+        }
+
+        fun getBalance(callback: VaultCallback<List<Balance>>) {
+            sharedInstance.vaultService.getBalance(callback)
         }
     }
 
     private var retrofit = {
+        val gson = GsonBuilder()
+                .registerTypeAdapter(Date::class.java, GsonDateAdapter(context))
+                .create()
+
         val interceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -73,7 +84,7 @@ class VaultSDK private constructor(
         Retrofit.Builder()
                 .client(client)
                 .baseUrl(vaultEndpoint)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
     }()
 

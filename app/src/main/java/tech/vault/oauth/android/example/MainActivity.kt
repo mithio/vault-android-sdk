@@ -25,7 +25,8 @@ class MainActivity : AppCompatActivity() {
         VaultSDK.configure(
                 context = this,
                 clientId = "ba6cabfb4de8d9f4f388124b1afe82b1",
-                clientSecret = "aefd2b59d780eb29bc95b6cf8f3503233ad702141b20f53c8a645afbb8c6616048c5e9cc741e0ebee1a2469c68364e57e29dbeeabadc0b67958b9c3da7eabab9"
+                clientSecret = "aefd2b59d780eb29bc95b6cf8f3503233ad702141b20f53c8a645afbb8c6616048c5e9cc741e0ebee1a2469c68364e57e29dbeeabadc0b67958b9c3da7eabab9",
+                miningKey = "demo"
         )
 
         requestTokenButton.setOnClickListener {
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         userInfoButton.setOnClickListener {
-            VaultSDK.getPersonalInfo { result ->
+            VaultSDK.getUserInfo { result ->
                 result.onSuccess {
 
                 }

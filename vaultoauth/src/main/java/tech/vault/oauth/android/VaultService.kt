@@ -19,7 +19,7 @@ internal class VaultService(
         if (grantCode != null && state != null) {
             val timeStamp = (System.currentTimeMillis() / 1000).toString()
             val nonce = Random().nextInt()
-            val requestBody = VaultRetrofitService.RequestTokenBody(
+            val requestBody = RequestTokenBody(
                     clientId,
                     timeStamp,
                     nonce,
@@ -42,8 +42,7 @@ internal class VaultService(
         }
     }
 
-    fun getPersonalInfo(callback: VaultCallback<VaultUserInfo>) {
-
+    fun getUserInfo(callback: VaultCallback<VaultUserInfo>) {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val nonce = Random().nextInt()
         val sig = VaultPayload.build {
@@ -56,7 +55,7 @@ internal class VaultService(
 
         val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
         vaultRetrofitService
-                .getPersonalInfo(
+                .getUserInfo(
                         authToken,
                         sig,
                         clientId,
@@ -68,6 +67,35 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<VaultUserInfo>, response: Response<VaultUserInfo>) {
+                        response.body()?.let { callback(Result.success(it)) }
+                    }
+                })
+    }
+
+    fun getBalance(callback: VaultCallback<List<Balance>>) {
+        val timeStamp = (System.currentTimeMillis() / 1000).toString()
+        val nonce = Random().nextInt()
+        val sig = VaultPayload.build {
+            dict(
+                    "client_id" to value(clientId),
+                    "timestamp" to value(timeStamp),
+                    "nonce" to value(nonce)
+            )
+        }.toSignature(clientSecret)
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        vaultRetrofitService
+                .getBalance(
+                        authToken,
+                        sig,
+                        clientId,
+                        nonce,
+                        timeStamp
+                )
+                .enqueue(object : Callback<List<Balance>> {
+                    override fun onFailure(call: Call<List<Balance>>, t: Throwable) {
+                    }
+
+                    override fun onResponse(call: Call<List<Balance>>, response: Response<List<Balance>>) {
                         response.body()?.let { callback(Result.success(it)) }
                     }
                 })
