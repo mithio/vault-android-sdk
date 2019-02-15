@@ -1,34 +1,32 @@
 package tech.vault.oauth.android
 
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
-import android.os.Parcelable
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.parcel.Parcelize
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+typealias VaultCallback<T> = (Result<T>) -> Unit
+
 class VaultSDK private constructor(
+        context: Context,
         val clientId: String,
         val clientSecret: String
 ) {
 
-    sealed class AuthResult : Parcelable {
-        @Parcelize
-        data class Success(val token: String) : AuthResult()
-
-        @Parcelize
-        data class Failure(val error: Throwable) : AuthResult()
-    }
-
     class CallbackManager(
-            private val callback: (token: AuthResult) -> Unit
+            private val callback: VaultCallback<String>
     ) {
+
+        @Suppress("UNCHECKED_CAST")
         fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
             if (requestCode == 300 && resultCode == RESULT_OK && data != null) {
-                callback(data.getParcelableExtra(AUTH_RESULT_KEY))
+                val serializableExtra = data.getSerializableExtra(AUTH_RESULT_KEY) as Result<String>
+                callback(serializableExtra)
             }
         }
     }
@@ -46,8 +44,13 @@ class VaultSDK private constructor(
                 return instance ?: error("try use sdk instance before configure")
             }
 
-        fun configure(clientId: String, clientSecret: String) {
-            instance = VaultSDK(clientId, clientSecret)
+        val loggedIn: Boolean
+            get() {
+                return sharedInstance.pref.contains("authToken")
+            }
+
+        fun configure(context: Context, clientId: String, clientSecret: String) {
+            instance = VaultSDK(context, clientId, clientSecret)
         }
 
         fun requestToken(activity: AppCompatActivity) {
@@ -55,6 +58,10 @@ class VaultSDK private constructor(
                     Intent(activity, VaultOAuthActivity::class.java),
                     300
             )
+        }
+
+        fun getPersonalInfo(callback: VaultCallback<VaultUserInfo>) {
+            sharedInstance.vaultService.getPersonalInfo(callback)
         }
     }
 
@@ -72,8 +79,12 @@ class VaultSDK private constructor(
 
     internal val vaultService = VaultService(
             retrofit.create(VaultRetrofitService::class.java),
-            VaultSDK.sharedInstance.clientId,
-            VaultSDK.sharedInstance.clientSecret
+            clientId,
+            clientSecret
     )
+
+    internal val pref: SharedPreferences by lazy {
+        context.getSharedPreferences("vault_oauth", Context.MODE_PRIVATE)
+    }
 
 }

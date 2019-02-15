@@ -2,9 +2,7 @@ package tech.vault.oauth.android
 
 import android.app.Activity
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import net.openid.appauth.*
@@ -44,10 +42,6 @@ class VaultOAuthActivity : Activity() {
         authorizationService.createCustomTabsIntentBuilder(authRequest.toUri())
     }
 
-    private val pref: SharedPreferences by lazy {
-        getSharedPreferences("vault_oauth", Context.MODE_PRIVATE)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acvitity_vault_oauth)
@@ -65,15 +59,10 @@ class VaultOAuthActivity : Activity() {
         val resultUri = intent?.data
         if (resultUri != null) {
             VaultSDK.sharedInstance.vaultService.getAccessToken(resultUri) { result ->
-                when (result) {
-                    is VaultSDK.AuthResult.Success -> {
-                        pref.edit()
-                                .putString("authToken", result.token)
-                                .apply()
-                    }
-                    is VaultSDK.AuthResult.Failure -> {
-
-                    }
+                result.onSuccess {
+                    VaultSDK.sharedInstance.pref.edit()
+                            .putString("authToken", it)
+                            .apply()
                 }
                 setResult(RESULT_OK, Intent().putExtra(VaultSDK.AUTH_RESULT_KEY, result))
             }

@@ -4,8 +4,8 @@ import android.net.Uri
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.security.SecureRandom
 import java.util.*
+
 
 internal class VaultService(
         private val vaultRetrofitService: VaultRetrofitService,
@@ -13,7 +13,7 @@ internal class VaultService(
         private val clientSecret: String
 ) {
 
-    fun getAccessToken(resultUri: Uri, callback: (VaultSDK.AuthResult) -> Unit) {
+    fun getAccessToken(resultUri: Uri, callback: (Result<String>) -> Unit) {
         val grantCode = resultUri.getQueryParameter("grant_code")
         val state = resultUri.getQueryParameter("state")
         if (grantCode != null && state != null) {
@@ -32,13 +32,44 @@ internal class VaultService(
                             requestBody)
                     .enqueue(object : Callback<VaultRetrofitService.TokenBody> {
                         override fun onFailure(call: Call<VaultRetrofitService.TokenBody>, t: Throwable) {
-                            callback(VaultSDK.AuthResult.Failure(t))
+                            callback(Result.failure(t))
                         }
 
                         override fun onResponse(call: Call<VaultRetrofitService.TokenBody>, response: Response<VaultRetrofitService.TokenBody>) {
-                            response.body()?.let { callback(VaultSDK.AuthResult.Success(it.token)) }
+                            response.body()?.let { callback(Result.success(it.token)) }
                         }
                     })
         }
+    }
+
+    fun getPersonalInfo(callback: VaultCallback<VaultUserInfo>) {
+
+        val timeStamp = (System.currentTimeMillis() / 1000).toString()
+        val nonce = Random().nextInt()
+        val sig = VaultPayload.build {
+            dict(
+                    "client_id" to value(clientId),
+                    "timestamp" to value(timeStamp),
+                    "nonce" to value(nonce)
+            )
+        }.toSignature(clientSecret)
+
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        vaultRetrofitService
+                .getPersonalInfo(
+                        authToken,
+                        sig,
+                        clientId,
+                        nonce,
+                        timeStamp
+                )
+                .enqueue(object : Callback<VaultUserInfo> {
+                    override fun onFailure(call: Call<VaultUserInfo>, t: Throwable) {
+                    }
+
+                    override fun onResponse(call: Call<VaultUserInfo>, response: Response<VaultUserInfo>) {
+                        response.body()?.let { callback(Result.success(it)) }
+                    }
+                })
     }
 }

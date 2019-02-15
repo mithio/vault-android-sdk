@@ -2,13 +2,20 @@ package tech.vault.oauth.android
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
+
+data class VaultUserInfo(
+        @SerializedName("kyc_level") val kycLevel: Int,
+        @SerializedName("stake_level") val stakeLevel: Int,
+        @SerializedName("balance") val balance: Double,
+        @SerializedName("amount") val amount: Double,
+        @SerializedName("staked_amount") val stakedAmount: Double
+)
+
 
 interface VaultRetrofitService {
 
-    class RequestTokenBody(
+    data class RequestTokenBody(
             @SerializedName("client_id")
             val clientId: String,
             val timestamp: String,
@@ -39,4 +46,14 @@ interface VaultRetrofitService {
             @Header("X-Vault-Signature") sig: String,
             @Body body: RequestTokenBody
     ): Call<TokenBody>
+
+    @GET("oauth/user-info")
+    fun getPersonalInfo(
+            @Header("Authorization") authKey: String,
+            @Header("X-Vault-Signature") sig: String,
+            @Query("client_id") clientId: String,
+            @Query("nonce") nonce: Int,
+            @Query("timestamp") timestamp: String
+    ): Call<VaultUserInfo>
+
 }
