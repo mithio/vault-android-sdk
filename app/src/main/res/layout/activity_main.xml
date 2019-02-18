@@ -10,32 +10,37 @@
         android:id="@+id/requestTokenButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request Access Token"
+        android:text="request access token"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <Button
         android:id="@+id/userInfoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="showUserInfo"
-        android:visibility="gone"
+        android:text="show user info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/requestTokenButton" />
+
+    <Button
+        android:id="@+id/showMiningViewButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="show mining view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/userInfoButton" />
 
     <Button
         android:id="@+id/unbindButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="unbind app to vault"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userInfoButton" />
-
+        app:layout_constraintTop_toBottomOf="@id/showMiningViewButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
