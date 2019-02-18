@@ -100,15 +100,15 @@ class VaultSDK private constructor(
                 .build()
     }()
 
-    internal val vaultService = VaultService(
-            retrofit.create(VaultRetrofitService::class.java),
-            clientId,
-            clientSecret,
-            miningKey
-    )
-
     internal val pref: SharedPreferences by lazy {
         context.getSharedPreferences("vault_oauth", Context.MODE_PRIVATE)
     }
 
+    internal val vaultService = VaultService(
+            retrofit.create(VaultRetrofitService::class.java),
+            clientId,
+            clientSecret,
+            miningKey,
+            pref
+    )
 }

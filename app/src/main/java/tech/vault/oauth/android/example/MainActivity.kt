@@ -2,7 +2,8 @@ package tech.vault.oauth.android.example
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tech.vault.oauth.android.VaultSDK
@@ -35,8 +36,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (VaultSDK.loggedIn) {
-            userInfoButton.visibility = View.VISIBLE
-            unbindButton.visibility = View.VISIBLE
+            requestTokenButton.visibility = GONE
+            showMiningActivitiesButton.visibility = VISIBLE
+            userInfoButton.visibility = VISIBLE
+            unbindButton.visibility = VISIBLE
+            mine10RewardButton.visibility = VISIBLE
+            unbindButton.visibility = VISIBLE
         }
 
         userInfoButton.setOnClickListener {
@@ -44,12 +49,6 @@ class MainActivity : AppCompatActivity() {
                 result.onSuccess {
 
                 }
-            }
-        }
-
-        unbindButton.setOnClickListener {
-            VaultSDK.unbind {
-
             }
         }
 
@@ -62,6 +61,19 @@ class MainActivity : AppCompatActivity() {
             VaultSDK.getMiningActivities { result ->
                 result.onSuccess {
                     resultTextView.text = it.toString()
+                }
+            }
+        }
+
+        unbindButton.setOnClickListener {
+            VaultSDK.unbind { result ->
+                result.onSuccess {
+                    requestTokenButton.visibility = VISIBLE
+                    showMiningActivitiesButton.visibility = GONE
+                    userInfoButton.visibility = GONE
+                    unbindButton.visibility = GONE
+                    mine10RewardButton.visibility = GONE
+                    unbindButton.visibility = GONE
                 }
             }
         }

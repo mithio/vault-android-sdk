@@ -1,5 +1,6 @@
 package tech.vault.oauth.android
 
+import android.content.SharedPreferences
 import android.net.Uri
 import retrofit2.Call
 import retrofit2.Callback
@@ -11,7 +12,8 @@ internal class VaultService(
         private val vaultRetrofitService: VaultRetrofitService,
         private val clientId: String,
         private val clientSecret: String,
-        private val miningKey: String
+        private val miningKey: String,
+        private val pref: SharedPreferences
 ) {
 
     fun getAccessToken(resultUri: Uri, callback: (Result<String>) -> Unit) {
@@ -194,7 +196,12 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        response.body()?.let { callback(Result.success(it)) }
+                        response.body()?.let {
+                            pref.edit()
+                                    .remove("authToken")
+                                    .apply()
+                            callback(Result.success(it))
+                        }
                     }
                 })
     }
