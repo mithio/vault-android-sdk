@@ -33,5 +33,21 @@ interface VaultRetrofitService {
             @Query("timestamp") timestamp: String
     ): Call<List<Balance>>
 
+    @GET("mining")
+    fun getMiningActivities(
+            @Header("Authorization") authKey: String,
+            @Header("X-Vault-Signature") sig: String,
+            @Query("client_id") clientId: String,
+            @Query("nonce") nonce: Int,
+            @Query("timestamp") timestamp: String,
+            @Query("mining_key") miningKey: String
+    ): Call<String>
+
+    @POST("mining")
+    fun mining(
+            @Header("X-Vault-Signature") sig: String,
+            @Header("Authorization") authKey: String,
+            @Body body: MiningBody
+    ): Call<String>
 
 }

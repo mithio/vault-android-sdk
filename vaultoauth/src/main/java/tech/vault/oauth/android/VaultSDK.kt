@@ -17,8 +17,8 @@ typealias VaultCallback<T> = (Result<T>) -> Unit
 class VaultSDK private constructor(
         context: Context,
         val clientId: String,
-        val clientSecret: String,
-        val miningKey: String
+        clientSecret: String,
+        miningKey: String
 ) {
 
     class CallbackManager(
@@ -70,6 +70,14 @@ class VaultSDK private constructor(
         fun getBalance(callback: VaultCallback<List<Balance>>) {
             sharedInstance.vaultService.getBalance(callback)
         }
+
+        fun getMiningActivities(callback: VaultCallback<String>) {
+            sharedInstance.vaultService.getMiningActivities(callback)
+        }
+
+        fun mining(callback: VaultCallback<String>) {
+            sharedInstance.vaultService.mining(callback)
+        }
     }
 
     private var retrofit = {
@@ -91,7 +99,8 @@ class VaultSDK private constructor(
     internal val vaultService = VaultService(
             retrofit.create(VaultRetrofitService::class.java),
             clientId,
-            clientSecret
+            clientSecret,
+            miningKey
     )
 
     internal val pref: SharedPreferences by lazy {
