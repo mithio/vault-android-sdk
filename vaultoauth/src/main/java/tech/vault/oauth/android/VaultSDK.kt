@@ -78,6 +78,10 @@ class VaultSDK private constructor(
         fun mining(callback: VaultCallback<String>) {
             sharedInstance.vaultService.mining(callback)
         }
+
+        fun unbind(callback: VaultCallback<Void>) {
+            sharedInstance.vaultService.unbind(callback)
+        }
     }
 
     private var retrofit = {

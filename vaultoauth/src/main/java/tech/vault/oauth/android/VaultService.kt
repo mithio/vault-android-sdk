@@ -166,4 +166,33 @@ internal class VaultService(
                     }
                 })
     }
+
+    fun unbind(callback: VaultCallback<Void>) {
+        val timeStamp = (System.currentTimeMillis() / 1000).toString()
+        val nonce = Random().nextInt()
+        val sig = VaultPayload.build {
+            dict(
+                    "client_id" to value(clientId),
+                    "timestamp" to value(timeStamp),
+                    "nonce" to value(nonce)
+            )
+        }.toSignature(clientSecret)
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        vaultRetrofitService
+                .unbind(
+                        authToken,
+                        sig,
+                        clientId,
+                        nonce,
+                        timeStamp
+                )
+                .enqueue(object : Callback<Void> {
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                    }
+
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        response.body()?.let { callback(Result.success(it)) }
+                    }
+                })
+    }
 }

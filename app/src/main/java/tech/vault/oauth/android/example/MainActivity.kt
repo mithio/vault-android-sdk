@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         if (VaultSDK.loggedIn) {
             userInfoButton.visibility = View.VISIBLE
+            unbindButton.visibility = View.VISIBLE
         }
 
         userInfoButton.setOnClickListener {
@@ -42,6 +43,12 @@ class MainActivity : AppCompatActivity() {
                 result.onSuccess {
 
                 }
+            }
+        }
+
+        unbindButton.setOnClickListener {
+            VaultSDK.unbind {
+
             }
         }
     }

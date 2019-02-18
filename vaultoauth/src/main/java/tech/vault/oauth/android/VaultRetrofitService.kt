@@ -50,4 +50,13 @@ interface VaultRetrofitService {
             @Body body: MiningBody
     ): Call<String>
 
+    @DELETE("oauth/token")
+    fun unbind(
+        @Header("Authorization") authKey: String,
+        @Header("X-Vault-Signature") sig: String,
+        @Query("client_id") clientId: String,
+        @Query("nonce") nonce: Int,
+        @Query("timestamp") timestamp: String
+    ): Call<Void>
+
 }
