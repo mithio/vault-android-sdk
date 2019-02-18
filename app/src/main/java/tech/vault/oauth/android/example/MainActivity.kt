@@ -6,6 +6,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tech.vault.oauth.android.VaultSDK
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,6 +50,19 @@ class MainActivity : AppCompatActivity() {
         unbindButton.setOnClickListener {
             VaultSDK.unbind {
 
+            }
+        }
+
+        mine10RewardButton.setOnClickListener {
+            VaultSDK.mining(10.0, UUID.randomUUID().toString()) {
+
+            }
+        }
+        showMiningActivitiesButton.setOnClickListener {
+            VaultSDK.getMiningActivities { result ->
+                result.onSuccess {
+                    resultTextView.text = it.toString()
+                }
             }
         }
     }

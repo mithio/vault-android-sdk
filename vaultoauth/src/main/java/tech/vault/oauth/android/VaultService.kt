@@ -102,7 +102,7 @@ internal class VaultService(
                 })
     }
 
-    fun getMiningActivities(callback: VaultCallback<String>) {
+    fun getMiningActivities(callback: VaultCallback<List<MiningActivity>>) {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val nonce = Random().nextInt()
         val sig = VaultPayload.build {
@@ -123,29 +123,32 @@ internal class VaultService(
                         timeStamp,
                         miningKey
                 )
-                .enqueue(object : Callback<String> {
-                    override fun onFailure(call: Call<String>, t: Throwable) {
+                .enqueue(object : Callback<List<MiningActivity>> {
+                    override fun onFailure(call: Call<List<MiningActivity>>, t: Throwable) {
                     }
 
-                    override fun onResponse(call: Call<String>, response: Response<String>) {
+                    override fun onResponse(call: Call<List<MiningActivity>>, response: Response<List<MiningActivity>>) {
                         response.body()?.let { callback(Result.success(it)) }
                     }
                 })
     }
 
-    fun mining(callback: VaultCallback<String>) {
+    fun mining(reward: Double, uuid: String, callback: VaultCallback<Void>) {
 
-        val happenedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(Date())
+        val happenedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .apply {
+                    timeZone = TimeZone.getTimeZone("UTC")
+                }
+                .format(Date())
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val nonce = Random().nextInt()
-        val uuid = UUID.randomUUID().toString()
         val body = MiningBody(
                 clientId,
                 timeStamp,
                 nonce,
                 miningKey,
                 uuid,
-                10,
+                reward,
                 happenedAt
         )
 
@@ -157,11 +160,11 @@ internal class VaultService(
                         authToken,
                         body
                 )
-                .enqueue(object : Callback<String> {
-                    override fun onFailure(call: Call<String>, t: Throwable) {
+                .enqueue(object : Callback<Void> {
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
                     }
 
-                    override fun onResponse(call: Call<String>, response: Response<String>) {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         response.body()?.let { callback(Result.success(it)) }
                     }
                 })

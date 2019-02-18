@@ -20,7 +20,7 @@ data class RequestTokenBody(
         @SerializedName("grant_code")
         val grantCode: String
 ) {
-    fun toSig(key: String): String {
+    internal fun toSig(key: String): String {
         return VaultPayload.build {
             dict(
                     "client_id" to value(clientId),
@@ -48,11 +48,11 @@ data class MiningBody(
         @SerializedName("mining_key")
         val miningKey: String,
         val uuid: String,
-        val reward: Int,
+        val reward: Double,
         @SerializedName("happened_at")
         val happenedAt: String
 ) {
-    fun toSig(key: String): String {
+    internal fun toSig(key: String): String {
         return VaultPayload.build {
             dict(
                     "client_id" to value(clientId),
@@ -64,5 +64,24 @@ data class MiningBody(
                     "happened_at" to value(happenedAt)
             )
         }.toSignature(key)
+    }
+}
+
+data class MiningActivity(
+        val amount: Double,
+        val happenedAt: Date,
+        val reward: Double,
+        val status: Status,
+        val updatedAt: Date,
+        val uuid: String
+
+) {
+    enum class Status {
+        PENDING,
+        MINING,
+        MINED,
+        DELETED,
+        REJECTED,
+        ERROR
     }
 }

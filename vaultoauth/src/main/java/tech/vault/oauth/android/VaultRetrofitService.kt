@@ -41,14 +41,14 @@ interface VaultRetrofitService {
             @Query("nonce") nonce: Int,
             @Query("timestamp") timestamp: String,
             @Query("mining_key") miningKey: String
-    ): Call<String>
+    ): Call<List<MiningActivity>>
 
     @POST("mining")
     fun mining(
             @Header("X-Vault-Signature") sig: String,
             @Header("Authorization") authKey: String,
             @Body body: MiningBody
-    ): Call<String>
+    ): Call<Void>
 
     @DELETE("oauth/token")
     fun unbind(

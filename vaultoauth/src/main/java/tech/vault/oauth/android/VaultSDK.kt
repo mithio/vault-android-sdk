@@ -71,12 +71,12 @@ class VaultSDK private constructor(
             sharedInstance.vaultService.getBalance(callback)
         }
 
-        fun getMiningActivities(callback: VaultCallback<String>) {
+        fun getMiningActivities(callback: VaultCallback<List<MiningActivity>>) {
             sharedInstance.vaultService.getMiningActivities(callback)
         }
 
-        fun mining(callback: VaultCallback<String>) {
-            sharedInstance.vaultService.mining(callback)
+        fun mining(reward: Double, uuid: String, callback: VaultCallback<Void>) {
+            sharedInstance.vaultService.mining(reward, uuid, callback)
         }
 
         fun unbind(callback: VaultCallback<Void>) {
