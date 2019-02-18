@@ -1,6 +1,23 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.novoda.bintray-release'
+
+publish {
+
+    def groupProjectID = 'tech.vault.oauth.android'
+    def artifactProjectID = 'vault_oauth'
+    def publishVersionID = '0.1.0'
+
+    userOrg = 'drain'
+    repoName = 'vault_oauth'
+    groupId = groupProjectID
+    artifactId = artifactProjectID
+    publishVersion = publishVersionID
+    desc = 'vault oauth'
+    website = 'https://github.com/Drainet'
+
+}
 
 android {
     compileSdkVersion 28
