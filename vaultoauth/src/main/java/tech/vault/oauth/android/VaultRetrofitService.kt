@@ -16,7 +16,7 @@ interface VaultRetrofitService {
     ): Call<TokenBody>
 
     @GET("oauth/user-info")
-    fun getUserInfo(
+    fun getUserInformation(
             @Header("Authorization") authKey: String,
             @Header("X-Vault-Signature") sig: String,
             @Query("client_id") clientId: String,
@@ -25,7 +25,7 @@ interface VaultRetrofitService {
     ): Call<VaultUserInfo>
 
     @GET("oauth/balance")
-    fun getBalance(
+    fun getClientInformation(
             @Header("Authorization") authKey: String,
             @Header("X-Vault-Signature") sig: String,
             @Query("client_id") clientId: String,
@@ -34,7 +34,7 @@ interface VaultRetrofitService {
     ): Call<List<Balance>>
 
     @GET("mining")
-    fun getMiningActivities(
+    fun getUserMiningAction(
             @Header("Authorization") authKey: String,
             @Header("X-Vault-Signature") sig: String,
             @Query("client_id") clientId: String,
@@ -43,20 +43,31 @@ interface VaultRetrofitService {
             @Query("mining_key") miningKey: String
     ): Call<List<MiningActivity>>
 
+    @GET("mining")
+    fun getUserMiningAction(
+            @Header("Authorization") authKey: String,
+            @Header("X-Vault-Signature") sig: String,
+            @Query("client_id") clientId: String,
+            @Query("nonce") nonce: Int,
+            @Query("timestamp") timestamp: String,
+            @Query("mining_key") miningKey: String,
+            @Query("next_id") nextId: String
+    ): Call<List<MiningActivity>>
+
     @POST("mining")
-    fun mining(
+    fun postUserMiningAction(
             @Header("X-Vault-Signature") sig: String,
             @Header("Authorization") authKey: String,
             @Body body: MiningBody
     ): Call<Void>
 
     @DELETE("oauth/token")
-    fun unbind(
-        @Header("Authorization") authKey: String,
-        @Header("X-Vault-Signature") sig: String,
-        @Query("client_id") clientId: String,
-        @Query("nonce") nonce: Int,
-        @Query("timestamp") timestamp: String
+    fun delUnbindToken(
+            @Header("Authorization") authKey: String,
+            @Header("X-Vault-Signature") sig: String,
+            @Query("client_id") clientId: String,
+            @Query("nonce") nonce: Int,
+            @Query("timestamp") timestamp: String
     ): Call<Void>
 
 }

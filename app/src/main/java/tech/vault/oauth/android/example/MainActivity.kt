@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import tech.vault.oauth.android.VaultSDK
@@ -13,10 +14,10 @@ class MainActivity : AppCompatActivity() {
 
     private val callbackManager: VaultSDK.CallbackManager = VaultSDK.CallbackManager { authResult ->
         authResult.onSuccess {
-
+            updateView()
         }
         authResult.onFailure {
-
+            Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -31,10 +32,58 @@ class MainActivity : AppCompatActivity() {
                 miningKey = "demo"
         )
 
+        updateView()
+
         requestTokenButton.setOnClickListener {
-            VaultSDK.requestToken(this)
+            VaultSDK.getAccessToken(this)
         }
 
+        userInfoButton.setOnClickListener {
+            VaultSDK.getUserInformation { result ->
+                result.onSuccess {
+                    resultTextView.text = it.toString()
+                }
+                result.onFailure {
+                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        clientInfoButton.setOnClickListener {
+            VaultSDK.getClientInformation { result ->
+                result.onSuccess {
+                    resultTextView.text = it.toString()
+                }
+                result.onFailure {
+                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        mine10RewardButton.setOnClickListener {
+            VaultSDK.postUserMiningAction(10.0, UUID.randomUUID().toString()) {
+
+            }
+        }
+        showMiningActivitiesButton.setOnClickListener {
+            VaultSDK.getUserMiningAction(null) { result ->
+                result.onSuccess {
+                    resultTextView.text = it.toString()
+                }
+                result.onFailure {
+                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        unbindButton.setOnClickListener {
+            VaultSDK.delUnbindToken {
+                updateView()
+            }
+        }
+    }
+
+    private fun updateView() {
         if (VaultSDK.loggedIn) {
             requestTokenButton.visibility = GONE
             showMiningActivitiesButton.visibility = VISIBLE
@@ -42,42 +91,18 @@ class MainActivity : AppCompatActivity() {
             unbindButton.visibility = VISIBLE
             mine10RewardButton.visibility = VISIBLE
             unbindButton.visibility = VISIBLE
-        }
-
-        userInfoButton.setOnClickListener {
-            VaultSDK.getUserInfo { result ->
-                result.onSuccess {
-
-                }
-            }
-        }
-
-        mine10RewardButton.setOnClickListener {
-            VaultSDK.mining(10.0, UUID.randomUUID().toString()) {
-
-            }
-        }
-        showMiningActivitiesButton.setOnClickListener {
-            VaultSDK.getMiningActivities { result ->
-                result.onSuccess {
-                    resultTextView.text = it.toString()
-                }
-            }
-        }
-
-        unbindButton.setOnClickListener {
-            VaultSDK.unbind { result ->
-                result.onSuccess {
-                    requestTokenButton.visibility = VISIBLE
-                    showMiningActivitiesButton.visibility = GONE
-                    userInfoButton.visibility = GONE
-                    unbindButton.visibility = GONE
-                    mine10RewardButton.visibility = GONE
-                    unbindButton.visibility = GONE
-                }
-            }
+            clientInfoButton.visibility = VISIBLE
+        } else {
+            requestTokenButton.visibility = VISIBLE
+            showMiningActivitiesButton.visibility = GONE
+            userInfoButton.visibility = GONE
+            unbindButton.visibility = GONE
+            mine10RewardButton.visibility = GONE
+            unbindButton.visibility = GONE
+            clientInfoButton.visibility = GONE
         }
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)

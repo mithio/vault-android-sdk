@@ -10,8 +10,8 @@
         android:id="@+id/requestTokenButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="request access token"
         android:layout_marginTop="32dp"
+        android:text="request access token"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,10 +26,10 @@
         app:layout_constraintTop_toBottomOf="@id/requestTokenButton" />
 
     <Button
-        android:id="@+id/showMiningViewButton"
+        android:id="@+id/clientInfoButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="show mining view"
+        android:text="show client info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/userInfoButton" />
@@ -41,17 +41,16 @@
         android:text="mine 10 reward"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/showMiningViewButton" />
+        app:layout_constraintTop_toBottomOf="@id/clientInfoButton" />
 
     <Button
         android:id="@+id/showMiningActivitiesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="show mining activities"
-        app:layout_constraintTop_toBottomOf="@id/mine10RewardButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintTop_toBottomOf="@id/mine10RewardButton" />
 
     <Button
         android:id="@+id/unbindButton"
@@ -66,11 +65,10 @@
         android:id="@+id/resultTextView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/unbindButton"
         android:layout_margin="16dp"
-        />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/unbindButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

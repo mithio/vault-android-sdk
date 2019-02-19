@@ -21,6 +21,8 @@ class VaultSDK private constructor(
         miningKey: String
 ) {
 
+    data class Page<T>(val nextId: String?, val values: List<T>)
+
     class CallbackManager(
             private val callback: VaultCallback<String>
     ) {
@@ -56,31 +58,31 @@ class VaultSDK private constructor(
             instance = VaultSDK(context, clientId, clientSecret, miningKey)
         }
 
-        fun requestToken(activity: AppCompatActivity) {
+        fun getAccessToken(activity: AppCompatActivity) {
             activity.startActivityForResult(
                     Intent(activity, VaultOAuthActivity::class.java),
                     300
             )
         }
 
-        fun getUserInfo(callback: VaultCallback<VaultUserInfo>) {
+        fun getUserInformation(callback: VaultCallback<VaultUserInfo>) {
             sharedInstance.vaultService.getUserInfo(callback)
         }
 
-        fun getBalance(callback: VaultCallback<List<Balance>>) {
+        fun getClientInformation(callback: VaultCallback<List<Balance>>) {
             sharedInstance.vaultService.getBalance(callback)
         }
 
-        fun getMiningActivities(callback: VaultCallback<List<MiningActivity>>) {
-            sharedInstance.vaultService.getMiningActivities(callback)
+        fun getUserMiningAction(nextId: String?, callback: VaultCallback<Page<MiningActivity>>) {
+            sharedInstance.vaultService.getMiningActivities(nextId, callback)
         }
 
-        fun mining(reward: Double, uuid: String, callback: VaultCallback<Void>) {
-            sharedInstance.vaultService.mining(reward, uuid, callback)
+        fun postUserMiningAction(reward: Double, uuid: String, callback: VaultCallback<Void?>) {
+            sharedInstance.vaultService.postUserMiningAction(reward, uuid, callback)
         }
 
-        fun unbind(callback: VaultCallback<Void>) {
-            sharedInstance.vaultService.unbind(callback)
+        fun delUnbindToken(callback: VaultCallback<Void?>) {
+            sharedInstance.vaultService.delUnbindToken(callback)
         }
     }
 

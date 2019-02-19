@@ -67,6 +67,9 @@ class VaultOAuthActivity : Activity() {
                 setResult(RESULT_OK, Intent().putExtra(VaultSDK.AUTH_RESULT_KEY, result))
                 finish()
             }
+        } else {
+            setResult(RESULT_CANCELED)
+            finish()
         }
     }
 }

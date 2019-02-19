@@ -56,9 +56,10 @@ internal class VaultService(
             )
         }.toSignature(clientSecret)
 
-        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)
+                ?: error("try call vault api before get token")
         vaultRetrofitService
-                .getUserInfo(
+                .getUserInformation(
                         authToken,
                         sig,
                         clientId,
@@ -67,6 +68,7 @@ internal class VaultService(
                 )
                 .enqueue(object : Callback<VaultUserInfo> {
                     override fun onFailure(call: Call<VaultUserInfo>, t: Throwable) {
+                        callback(Result.failure(t))
                     }
 
                     override fun onResponse(call: Call<VaultUserInfo>, response: Response<VaultUserInfo>) {
@@ -85,9 +87,10 @@ internal class VaultService(
                     "nonce" to value(nonce)
             )
         }.toSignature(clientSecret)
-        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)
+                ?: error("try call vault api before get token")
         vaultRetrofitService
-                .getBalance(
+                .getClientInformation(
                         authToken,
                         sig,
                         clientId,
@@ -96,6 +99,7 @@ internal class VaultService(
                 )
                 .enqueue(object : Callback<List<Balance>> {
                     override fun onFailure(call: Call<List<Balance>>, t: Throwable) {
+                        callback(Result.failure(t))
                     }
 
                     override fun onResponse(call: Call<List<Balance>>, response: Response<List<Balance>>) {
@@ -104,38 +108,72 @@ internal class VaultService(
                 })
     }
 
-    fun getMiningActivities(callback: VaultCallback<List<MiningActivity>>) {
+    fun getMiningActivities(nextId: String?, callback: VaultCallback<VaultSDK.Page<MiningActivity>>) {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val nonce = Random().nextInt()
         val sig = VaultPayload.build {
-            dict(
-                    "client_id" to value(clientId),
-                    "timestamp" to value(timeStamp),
-                    "nonce" to value(nonce),
-                    "mining_key" to value(miningKey)
-            )
-        }.toSignature(clientSecret)
-        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
-        vaultRetrofitService
-                .getMiningActivities(
-                        authToken,
-                        sig,
-                        clientId,
-                        nonce,
-                        timeStamp,
-                        miningKey
+            if (nextId != null) {
+                dict(
+                        "client_id" to value(clientId),
+                        "timestamp" to value(timeStamp),
+                        "nonce" to value(nonce),
+                        "mining_key" to value(miningKey),
+                        "next_id" to value(nextId)
                 )
-                .enqueue(object : Callback<List<MiningActivity>> {
-                    override fun onFailure(call: Call<List<MiningActivity>>, t: Throwable) {
-                    }
+            } else {
+                dict(
+                        "client_id" to value(clientId),
+                        "timestamp" to value(timeStamp),
+                        "nonce" to value(nonce),
+                        "mining_key" to value(miningKey)
+                )
+            }
+        }.toSignature(clientSecret)
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)
+                ?: error("try call vault api before get token")
+        val call = if (nextId != null) {
+            vaultRetrofitService
+                    .getUserMiningAction(
+                            authToken,
+                            sig,
+                            clientId,
+                            nonce,
+                            timeStamp,
+                            miningKey,
+                            nextId
+                    )
 
-                    override fun onResponse(call: Call<List<MiningActivity>>, response: Response<List<MiningActivity>>) {
-                        response.body()?.let { callback(Result.success(it)) }
-                    }
-                })
+        } else {
+            vaultRetrofitService
+                    .getUserMiningAction(
+                            authToken,
+                            sig,
+                            clientId,
+                            nonce,
+                            timeStamp,
+                            miningKey
+                    )
+
+        }
+        call.enqueue(object : Callback<List<MiningActivity>> {
+            override fun onFailure(call: Call<List<MiningActivity>>, t: Throwable) {
+                callback(Result.failure(t))
+            }
+
+            override fun onResponse(call: Call<List<MiningActivity>>, response: Response<List<MiningActivity>>) {
+                response.body()?.let {
+                    val resultPage = VaultSDK.Page(
+                            response.headers()["X-Pagination-Next"],
+                            it
+                    )
+                    callback(Result.success(resultPage))
+                }
+
+            }
+        })
     }
 
-    fun mining(reward: Double, uuid: String, callback: VaultCallback<Void>) {
+    fun postUserMiningAction(reward: Double, uuid: String, callback: VaultCallback<Void?>) {
 
         val happenedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                 .apply {
@@ -154,25 +192,27 @@ internal class VaultService(
                 happenedAt
         )
 
-        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)
+                ?: error("try call vault api before get token")
         val sig = body.toSig(clientSecret)
         vaultRetrofitService
-                .mining(
+                .postUserMiningAction(
                         sig,
                         authToken,
                         body
                 )
-                .enqueue(object : Callback<Void> {
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                .enqueue(object : Callback<Void?> {
+                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                        callback(Result.failure(t))
                     }
 
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        response.body()?.let { callback(Result.success(it)) }
+                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                        response.body()?.let { callback(Result.success(null)) }
                     }
                 })
     }
 
-    fun unbind(callback: VaultCallback<Void>) {
+    fun delUnbindToken(callback: VaultCallback<Void?>) {
         val timeStamp = (System.currentTimeMillis() / 1000).toString()
         val nonce = Random().nextInt()
         val sig = VaultPayload.build {
@@ -182,26 +222,26 @@ internal class VaultService(
                     "nonce" to value(nonce)
             )
         }.toSignature(clientSecret)
-        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)!!
+        val authToken = VaultSDK.sharedInstance.pref.getString("authToken", null)
+                ?: error("try call vault api before get token")
         vaultRetrofitService
-                .unbind(
+                .delUnbindToken(
                         authToken,
                         sig,
                         clientId,
                         nonce,
                         timeStamp
                 )
-                .enqueue(object : Callback<Void> {
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                .enqueue(object : Callback<Void?> {
+                    override fun onFailure(call: Call<Void?>, t: Throwable) {
+                        callback(Result.failure(t))
                     }
 
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        response.body()?.let {
-                            pref.edit()
-                                    .remove("authToken")
-                                    .apply()
-                            callback(Result.success(it))
-                        }
+                    override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
+                        pref.edit()
+                                .remove("authToken")
+                                .apply()
+                        callback(Result.success(null))
                     }
                 })
     }
