@@ -12,8 +12,7 @@ import net.openid.appauth.connectivity.DefaultConnectionBuilder
 
 class VaultOAuthActivity : Activity() {
 
-    private val authUri =
-            Uri.parse("https://mining.mithvault.io/zh-TW/oauth/authorize?api=${VaultSDK.vaultEndpoint}")
+    private val authUri = Uri.parse("https://2019-hackathon.mithvault.io")
 
     private val authorizationServiceConfiguration = AuthorizationServiceConfiguration(authUri, Uri.parse(VaultSDK.vaultEndpoint))
 
