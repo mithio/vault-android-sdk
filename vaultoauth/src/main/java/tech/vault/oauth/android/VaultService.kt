@@ -5,6 +5,7 @@ import android.net.Uri
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,7 +40,12 @@ internal class VaultService(
                         }
 
                         override fun onResponse(call: Call<VaultRetrofitService.TokenBody>, response: Response<VaultRetrofitService.TokenBody>) {
-                            response.body()?.let { callback(Result.success(it.token)) }
+                            if (response.isSuccessful) {
+                                response.body()?.let { callback(Result.success(it.token)) }
+                            } else {
+                                val result = Result.failure<String>(Exception(response.errorBody()?.string()))
+                                callback(result)
+                            }
                         }
                     })
         }
@@ -72,7 +78,12 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<VaultUserInfo>, response: Response<VaultUserInfo>) {
-                        response.body()?.let { callback(Result.success(it)) }
+                        if (response.isSuccessful) {
+                            response.body()?.let { callback(Result.success(it)) }
+                        } else {
+                            val result = Result.failure<VaultUserInfo>(Exception(response.errorBody()?.string()))
+                            callback(result)
+                        }
                     }
                 })
     }
@@ -103,7 +114,12 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<List<Balance>>, response: Response<List<Balance>>) {
-                        response.body()?.let { callback(Result.success(it)) }
+                        if (response.isSuccessful) {
+                            response.body()?.let { callback(Result.success(it)) }
+                        } else {
+                            val result = Result.failure<List<Balance>>(Exception(response.errorBody()?.string()))
+                            callback(result)
+                        }
                     }
                 })
     }
@@ -161,14 +177,18 @@ internal class VaultService(
             }
 
             override fun onResponse(call: Call<List<MiningActivity>>, response: Response<List<MiningActivity>>) {
-                response.body()?.let {
-                    val resultPage = VaultSDK.Page(
-                            response.headers()["X-Pagination-Next"],
-                            it
-                    )
-                    callback(Result.success(resultPage))
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        val resultPage = VaultSDK.Page(
+                                response.headers()["X-Pagination-Next"],
+                                it
+                        )
+                        callback(Result.success(resultPage))
+                    }
+                } else {
+                    val result = Result.failure<VaultSDK.Page<MiningActivity>>(Exception(response.errorBody()?.string()))
+                    callback(result)
                 }
-
             }
         })
     }
@@ -207,7 +227,12 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                        response.body()?.let { callback(Result.success(null)) }
+                        if (response.isSuccessful) {
+                            callback(Result.success(null))
+                        } else {
+                            val result = Result.failure<Void?>(Exception(response.errorBody()?.string()))
+                            callback(result)
+                        }
                     }
                 })
     }
@@ -238,10 +263,15 @@ internal class VaultService(
                     }
 
                     override fun onResponse(call: Call<Void?>, response: Response<Void?>) {
-                        pref.edit()
-                                .remove("authToken")
-                                .apply()
-                        callback(Result.success(null))
+                        if (response.isSuccessful) {
+                            pref.edit()
+                                    .remove("authToken")
+                                    .apply()
+                            callback(Result.success(null))
+                        } else {
+                            val result = Result.failure<Void?>(Exception(response.errorBody()?.string()))
+                            callback(result)
+                        }
                     }
                 })
     }
