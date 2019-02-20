@@ -12,7 +12,33 @@ FEATURE
 
 INSTALLATION
 ------------
-TODO
+- Add the JitPack repository to your `build.gradle` repositories:
+
+```gradle
+repositories {
+    // ...
+    maven { url "https://jitpack.io" }
+}
+```
+
+- Add the core dependency:
+
+```
+dependencies {
+    compile 'com.github.mithio:vault-oauth-android:{lastest-version}'
+}
+```
+
+- Add the Vault SDK redirect scheme to gradle confiv
+
+```
+defaultConfig {
+    // ...
+    manifestPlaceholders = [
+        'appAuthRedirectScheme': 'vault-{client-id}'
+    ]
+}
+```
 
 USAGE
 ------------
