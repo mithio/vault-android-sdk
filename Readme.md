@@ -29,7 +29,7 @@ dependencies {
 }
 ```
 
-- Add the Vault SDK redirect scheme to gradle confiv
+- Add the Vault SDK redirect scheme to gradle config
 
 ```
 defaultConfig {
@@ -42,8 +42,23 @@ defaultConfig {
 
 USAGE
 ------------
-TODO
+configure the sdk with:
 
+```
+VaultSDK.configure(
+                context = context,
+                clientId = {client-id},
+                clientSecret = {client-secret},
+                miningKey = {mining-key}
+        )
+```
+
+and you are ready to call:
+
+```
+VaultSDK.getAccessToken(activity)
+```
+to get oauth access token
 
 GIVE FEEDBACK
 -------------
