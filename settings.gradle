@@ -1,1 +1,1 @@
-include ':app', ':vaultoauth'
+include ':app', ':MithVaultSDK'
