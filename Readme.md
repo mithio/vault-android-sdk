@@ -2,7 +2,7 @@ VAULT SDK for Android
 ========================
 
 This open-source library allows you to integrate VAULT into your app.
-Learn more about about the provided samples, documentation, integrating the SDK into your app, and more at [deck slide](https://drive.google.com/file/d/1wjHUySvL6YMUFf3HkHrWVASJEipdooOo/view?usp=sharing)
+Learn more about about the provided samples, documentation, integrating the SDK into your app, and more at [deck slide](https://drive.google.com/file/d/1g4-O4WggqCec6fTVqP2-4hDq6DFgUFbB/view)
 
 FEATURE
 --------
